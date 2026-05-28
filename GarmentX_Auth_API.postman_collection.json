@@ -1,0 +1,377 @@
+{
+  "info": {
+    "_postman_id": "garmentx-auth-api",
+    "name": "GarmentX Auth System API",
+    "description": "Complete MERN Authentication System Testing\n\nThis collection tests:\n- User Registration\n- User Login\n- JWT Token Generation\n- Protected Routes (Product CRUD)\n- User Profile Access\n- Logout\n\nSetup:\n1. Run backend: npm run dev\n2. Create demo users: node setup-demo-users.js\n3. Import this collection to Postman\n4. Use demo credentials to test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Customer\",\n  \"email\": \"customer@garmentx.com\",\n  \"password\": \"Password@123\",\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user account\n\nFields:\n- name: Full name\n- email: Email address (must be unique)\n- password: Min 6 characters\n- phone: Contact number\n\nResponse includes JWT token for immediate login"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.environment.set('auth_token', data.token);",
+                  "  pm.environment.set('user_id', data._id);",
+                  "  pm.environment.set('user_role', data.role);",
+                  "  console.log('✅ Login successful!');",
+                  "  console.log('Token saved to environment variable: auth_token');",
+                  "} else {",
+                  "  console.log('❌ Login failed');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@garmentx.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with admin account\n\nCredentials:\n- Email: admin@garmentx.com\n- Password: admin123\n- Role: admin\n\nResponse includes JWT token (automatically saved to auth_token variable)"
+          }
+        },
+        {
+          "name": "Login Regular User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.environment.set('auth_token', data.token);",
+                  "  pm.environment.set('user_id', data._id);",
+                  "  pm.environment.set('user_role', data.role);",
+                  "  console.log('✅ Login successful!');",
+                  "  console.log('Token: ' + data.token.substring(0, 20) + '...');",
+                  "} else {",
+                  "  console.log('❌ Login failed: ' + pm.response.json().message);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"munees@garmentx.com\",\n  \"password\": \"Munees123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with regular user account\n\nCredentials:\n- Email: munees@garmentx.com\n- Password: Munees123\n- Role: user\n\nToken automatically saved for protected route testing"
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Get logged-in user's profile (Protected Route)\n\nRequires:\n- Valid JWT token in Authorization header\n\nResponse includes:\n- User ID\n- Name\n- Email\n- Role"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product (with Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Premium Cotton T-Shirt",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "High-quality soft cotton t-shirt, comfortable for everyday wear",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "599",
+                  "type": "text"
+                },
+                {
+                  "key": "originalPrice",
+                  "value": "999",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "men",
+                  "type": "text"
+                },
+                {
+                  "key": "subcategory",
+                  "value": "shirts",
+                  "type": "text"
+                },
+                {
+                  "key": "brand",
+                  "value": "GarmentX",
+                  "type": "text"
+                },
+                {
+                  "key": "stock",
+                  "value": "100",
+                  "type": "text"
+                },
+                {
+                  "key": "sizes",
+                  "value": "[\"S\", \"M\", \"L\", \"XL\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "colors",
+                  "value": "[\"White\", \"Black\", \"Blue\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "discount",
+                  "value": "40",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            },
+            "description": "Create new product with image (Protected Route)\n\nRequires:\n- JWT token in Authorization header\n- Form-data body\n- Image file\n\nNote: Image uploaded to Cloudinary"
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            },
+            "description": "Get all active products (Public route)\n\nQuery params:\n- pageNumber: Page number (default: 1)\n- keyword: Search keyword (optional)"
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/products/{{product_id}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products", "{{product_id}}"]
+            },
+            "description": "Get single product details\n\nSet product_id variable to the MongoDB product ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Testing",
+      "item": [
+        {
+          "name": "Login with Wrong Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@garmentx.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test error handling for invalid password\n\nExpected Response: 401 Unauthorized\n- Message: \"Invalid email or password\""
+          }
+        },
+        {
+          "name": "Login with Non-existent User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"notexist@garmentx.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test error handling for non-existent user\n\nExpected Response: 401 Unauthorized\n- Message: \"Invalid email or password\""
+          }
+        },
+        {
+          "name": "Access Protected Route Without Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Product\",\n  \"description\": \"Test\",\n  \"price\": 100,\n  \"category\": \"men\",\n  \"stock\": 10\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            },
+            "description": "Test protection mechanism\n\nExpected Response: 401 Unauthorized\n- Message: \"Not authorized, no token provided\""
+          }
+        },
+        {
+          "name": "Access Protected Route with Invalid Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.token.here"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Test invalid token handling\n\nExpected Response: 401 Unauthorized\n- Message: \"Not authorized, token failed\""
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_token",
+      "value": "eyJ..."
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "user_role",
+      "value": ""
+    },
+    {
+      "key": "product_id",
+      "value": ""
+    }
+  ]
+}
